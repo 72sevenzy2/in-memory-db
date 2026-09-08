@@ -3,6 +3,7 @@ package root
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/72sevenzy2/in-memory-database/db"
 )
@@ -10,9 +11,8 @@ import (
 func TestString(t *testing.T) {
 	d := db.NewDB()
 
-
-	err := d.SetString("test1", "h")
-	err2 := d.SetString("test2", "hi2")
+	err := d.SetString("test1", "h", time.Minute*10)
+	err2 := d.SetString("test2", "hi2", time.Minute*10)
 
 	if err != nil || err2 != nil {
 		fmt.Println(err.Error(), err2.Error())
@@ -35,3 +35,4 @@ func TestString(t *testing.T) {
 		fmt.Println(k, v)
 	}
 }
+

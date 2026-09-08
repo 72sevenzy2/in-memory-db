@@ -2,17 +2,19 @@ package root
 
 import (
 	"fmt"
-	"github.com/72sevenzy2/in-memory-database/db"
 	"testing"
+	"time"
+
+	"github.com/72sevenzy2/in-memory-database/db"
 )
 
 func TestDbInt(t *testing.T) {
 	b := *db.NewDB()
-	b.SetInt("name", 100000)
+	b.SetInt("name", 100000, time.Minute*10)
 	b.Del("name")
 
-	b.SetInt("test1", 100000000)
-	b.SetInt("test2", 1434242324)
+	b.SetInt("test1", 100000000, time.Minute*10)
+	b.SetInt("test2", 1434242324, time.Minute*10)
 
 	all, _ := b.GetAllInt()
 

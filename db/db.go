@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/binary"
 	"errors"
+	"time"
 
 	"unsafe"
 )
@@ -32,10 +33,16 @@ func ByteToString(b []byte) string {
 	return unsafe.String(unsafe.SliceData(b), len(b))
 }
 
+// ttl deletion worker
+func (v *DB) DeleteAfterTTL(ttl time.Duration, key string) {
+	time.Sleep(ttl)
+	v.Del(key)
+}
+
 var InvalidInputErr = errors.New("invalid input.")
 var KeyAlreadyExistsErr = errors.New("key already exists.")
 
-func (v *DB) SetInt(key string, value uint32) error {
+func (v *DB) SetInt(key string, value uint32, ttl time.Duration) error {
 	if value == 0 {
 		return InvalidInputErr
 	}
@@ -52,6 +59,8 @@ func (v *DB) SetInt(key string, value uint32) error {
 	} else {
 		return KeyAlreadyExistsErr
 	}
+
+	go v.DeleteAfterTTL(ttl, key)
 	return nil
 }
 
@@ -90,7 +99,7 @@ func (v *DB) GetAllInt() (map[string]uint32, bool) {
 
 // string serialization and handlers
 
-func (v *DB) SetString(key string, value string) error {
+func (v *DB) SetString(key string, value string, ttl time.Duration) error {
 	if value == "" {
 		return InvalidInputErr
 	}
@@ -103,6 +112,8 @@ func (v *DB) SetString(key string, value string) error {
 	} else {
 		return KeyAlreadyExistsErr
 	}
+
+	go v.DeleteAfterTTL(ttl, key)
 	return nil
 }
 
