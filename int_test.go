@@ -1,4 +1,4 @@
-package outer
+package test
 
 import (
 	"fmt"
