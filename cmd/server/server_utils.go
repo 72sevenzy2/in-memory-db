@@ -68,11 +68,11 @@ func Get(parts []string, b *db.DB, conn net.Conn) bool {
 			conn.Write(db.StringToByte("data does not exist\n"))
 			return false
 		}
-		conn.Write([]byte(val2 + "\n"))
+		conn.Write(db.StringToByte(val2 + "\n"))
 		return false
 	}
 	// fmt.Println(val)
-	conn.Write([]byte(strconv.FormatUint(uint64(val), 10) + "\n")) // convert uint32 to readable format
+	conn.Write(db.StringToByte(strconv.FormatUint(uint64(val), 10) + "\n")) // convert uint32 to readable format
 	return true
 }
 
@@ -80,15 +80,16 @@ func Fetch(b *db.DB, conn net.Conn) {
 	vals, ok := b.GetAllInt()      // returns map[string]uint32, bool
 	vals2, ok2 := b.GetAllString() // returns map[string]string, bool
 
-	if ok {
-		for k, v := range vals {
-			fmt.Fprintln(conn, k, int(v))
-		}
+	if !ok && !ok2 {
+		conn.Write(db.StringToByte("no available key-values\n"))
+		return
 	}
-	if ok2 {
-		for k, v := range vals2 {
-			fmt.Fprintln(conn, k, v)
-		}
+
+	for k, v := range vals {
+		fmt.Fprintln(conn, k, int(v))
+	}
+	for k, v := range vals2 {
+		fmt.Fprintln(conn, k, v)
 	}
 }
 

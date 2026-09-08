@@ -62,24 +62,25 @@ func main() {
 					}
 				case "FETCH":
 					Fetch(b, conn)
+					conn.Write(db.StringToByte(".\n"))
 				case "DEL":
 					ok := Del(parts, conn, b)
 					if !ok {
 						continue
 					}
 				case "HELP":
-					conn.Write([]byte("General usage:\n"))
-					conn.Write([]byte(`
-					SET <KeyName> <value>
-					GET <KeyName>
-					DEL <KeyName>
-					\n`))
-
-					conn.Write([]byte("\nto exit: run <exit\n"))
+					conn.Write(db.StringToByte("General usage: \n" +
+						"SET <KeyName> <value> <TTL> \n" +
+						"|| GET <KeyName>\n" +
+						"|| DEL <KeyName>\n" +
+						"\\n\n" +
+						"to exit: run <exit>\n" +
+						".\n",
+					))
 				case "EXIT":
-					conn.Write([]byte("exited program.\n"))
-					return
-
+					conn.Write(db.StringToByte("exited program. \n" +
+						",\n",
+					))
 				default:
 					conn.Write([]byte("invalid command.\n"))
 				}

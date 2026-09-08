@@ -38,13 +38,22 @@ func main() {
 			continue
 		}
 
-		resp, err2 := reader.ReadString('\n')
-		if err2 != nil {
-			fmt.Println(err2.Error())
-			continue
-		}
+		for {
+			resp, err2 := reader.ReadString('\n')
+			if resp == ".\n" {
+				break
+			}
+			// exit delimeter
+			if resp == ",\n" {
+				return
+			}
+			if err2 != nil {
+				fmt.Println(err2.Error())
+				continue
+			}
 
-		fmt.Println(resp)
+			fmt.Println(resp)
+		}
 	}
 
 }
