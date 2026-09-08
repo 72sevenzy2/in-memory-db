@@ -32,7 +32,7 @@ func main() {
 		input := scanner.Text()
 
 		// send input to tcp server
-		_, err := conn.Write([]byte(input))
+		_, err := conn.Write([]byte(input + "\n"))
 		if err != nil {
 			fmt.Println(err.Error())
 			continue
@@ -52,7 +52,7 @@ func main() {
 				continue
 			}
 
-			fmt.Println(resp)
+			fmt.Print(resp)
 		}
 	}
 

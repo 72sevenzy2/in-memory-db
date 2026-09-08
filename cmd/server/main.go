@@ -53,7 +53,7 @@ func main() {
 				case "SET":
 					ok := Set(parts, conn, b)
 					if !ok {
-						continue
+						conn.Write(db.StringToByte(".\n"))
 					}
 				case "GET":
 					ok := Get(parts, b, conn)
@@ -82,7 +82,9 @@ func main() {
 						",\n",
 					))
 				default:
-					conn.Write([]byte("invalid command.\n"))
+					conn.Write(db.StringToByte("invalid command.\n" +
+						".\n",
+					))
 				}
 
 			}
