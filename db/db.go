@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/binary"
 	"errors"
+
 	"unsafe"
 )
 
@@ -21,6 +22,14 @@ func NewDB() *DB { // initialise a new map to hold data
 	return &DB{
 		data: make(map[string]Entity),
 	}
+}
+
+func StringToByte(str string) []byte {
+	return unsafe.Slice(unsafe.StringData(str), len(str))
+}
+
+func ByteToString(b []byte) string {
+	return unsafe.String(unsafe.SliceData(b), len(b))
 }
 
 var InvalidInputErr = errors.New("invalid input.")
@@ -89,7 +98,7 @@ func (v *DB) SetString(key string, value string) error {
 	if _, ok := v.data[key]; !ok {
 		v.data[key] = Entity{
 			Value: "string",
-			Data:  unsafe.Slice(unsafe.StringData(value), len(value)), // refers to the underlying []byte representation of value, without []byte conversions with copying
+			Data:  StringToByte(value), // refers to the underlying []byte representation of value, without []byte conversions with copying
 		}
 	} else {
 		return KeyAlreadyExistsErr
@@ -107,7 +116,7 @@ func (v *DB) GetString(key string) (string, bool) {
 	}
 
 	// returns string representation of val.Data without a string conversion.
-	return unsafe.String(unsafe.SliceData(val.Data), len(val.Data)), true
+	return ByteToString(val.Data), true
 }
 
 // display all string value data from db
@@ -117,7 +126,7 @@ func (v *DB) GetAllString() (map[string]string, bool) {
 
 	for k, val := range v.data {
 		if val.Value == "string" {
-			results[k] = unsafe.String(unsafe.SliceData(val.Data), len(val.Data))
+			results[k] = ByteToString(val.Data)
 		}
 	}
 

@@ -13,8 +13,8 @@ import (
 
 func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	if len(parts) < 3 || len(parts) > 3 {
-		conn.Write([]byte("invalid SET format:\n"))
-		conn.Write([]byte("SET <KeyName> <value>\n"))
+		conn.Write(db.StringToByte("invalid SET format:\n"))
+		conn.Write(db.StringToByte("SET <KeyName> <value>\n"))
 		return false
 	}
 
@@ -24,7 +24,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 		// prevent f from overflowing if number entered is too big
 		if f > math.MaxUint32 {
-			conn.Write([]byte("please include a number value less than unsigned int32.\n"))
+			conn.Write(db.StringToByte("please include a number value less than unsigned int32.\n"))
 			return false
 		}
 
@@ -33,7 +33,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 			fmt.Println(err.Error()) // print on server side
 			return false
 		}
-		conn.Write([]byte("successful.\n"))
+		conn.Write(db.StringToByte("successful.\n"))
 		return false
 	}
 
@@ -48,8 +48,8 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 func Get(parts []string, b *db.DB, conn net.Conn) bool {
 	if len(parts) < 2 || len(parts) > 2 {
-		conn.Write([]byte("invalid GET format:\n"))
-		conn.Write([]byte("GET <KeyName>\n"))
+		conn.Write(db.StringToByte("invalid GET format:\n"))
+		conn.Write(db.StringToByte("GET <KeyName>\n"))
 		return false
 	}
 
@@ -57,7 +57,7 @@ func Get(parts []string, b *db.DB, conn net.Conn) bool {
 	if !ok {
 		val2, ok2 := b.GetString(parts[1])
 		if !ok2 {
-			conn.Write([]byte("data does not exist\n"))
+			conn.Write(db.StringToByte("data does not exist\n"))
 			return false
 		}
 		conn.Write([]byte(val2 + "\n"))
@@ -86,15 +86,15 @@ func Fetch(b *db.DB, conn net.Conn) {
 
 func Del(parts []string, conn net.Conn, b *db.DB) bool {
 	if len(parts) < 2 || len(parts) > 2 {
-		conn.Write([]byte("usage: DEL <KeyName>\n"))
+		conn.Write(db.StringToByte("usage: DEL <KeyName>\n"))
 	}
 	if _, ok := b.GetInt(parts[1]); ok {
 		b.Del(parts[1])
-		conn.Write([]byte("successfully deleted key\n"))
+		conn.Write(db.StringToByte("successfully deleted key\n"))
 	}
 	if _, ok := b.GetString(parts[1]); ok {
 		b.Del(parts[1])
-		conn.Write([]byte("successfuly deleted key\n"))
+		conn.Write(db.StringToByte("successfuly deleted key\n"))
 		return false
 	}
 	fmt.Fprintln(conn, "key does not exit.", parts[1])
