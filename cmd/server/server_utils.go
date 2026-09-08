@@ -5,17 +5,25 @@ import (
 	"math"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/72sevenzy2/in-memory-database/db"
 )
 
 // utility functions for server/main.go
 
+// todo: add ttl existence validation to cli for setting ttls.
+
 func Set(parts []string, conn net.Conn, b *db.DB) bool {
-	if len(parts) < 3 || len(parts) > 3 {
+	if len(parts) < 4 || len(parts) > 4 {
 		conn.Write(db.StringToByte("invalid SET format:\n"))
-		conn.Write(db.StringToByte("SET <KeyName> <value>\n"))
+		conn.Write(db.StringToByte("SET <KeyName> <value> <TTL Expiration (in minutes eg: 5)>\n"))
 		return false
+	}
+
+	n, err := strconv.Atoi(parts[3]) // parse ttl expiration
+	if err != nil {
+		conn.Write(db.StringToByte("please include a valid TTL, (eg: 10, will be in minutes)"))
 	}
 
 	f, err := strconv.ParseUint(parts[2], 10, 32) // returns uint64, err.
@@ -24,13 +32,13 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 		// prevent f from overflowing if number entered is too big
 		if f > math.MaxUint32 {
-			conn.Write(db.StringToByte("please include a number value less than unsigned int32.\n"))
+			conn.Write(db.StringToByte("please include a number value within range of unsigned int32.\n"))
 			return false
 		}
 
-		err := b.SetInt(parts[1], uint32(f))
-		if err != nil {
-			fmt.Println(err.Error()) // print on server side
+		err2 := b.SetInt(parts[1], uint32(f), time.Minute*time.Duration(n))
+		if err2 != nil {
+			fmt.Println(err2.Error()) // print on server side
 			return false
 		}
 		conn.Write(db.StringToByte("successful.\n"))
@@ -38,9 +46,9 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	}
 
 	// its a string if unable to parse to uint.
-	err2 := b.SetString(parts[1], parts[2])
+	err2 := b.SetString(parts[1], parts[2], time.Minute*time.Duration(n))
 	if err2 != nil {
-		fmt.Println(err.Error())
+		fmt.Println(err2.Error())
 		return false
 	}
 	return true
