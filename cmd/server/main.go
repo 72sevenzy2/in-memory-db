@@ -5,7 +5,6 @@ import (
 	"net"
 	"strings"
 
-	usa "github.com/72sevenzy2/in-memory-database"
 	"github.com/72sevenzy2/in-memory-database/db"
 )
 
@@ -70,7 +69,11 @@ func main() {
 					}
 				case "HELP":
 					conn.Write([]byte("General usage:\n"))
-					usa.DisplayUsage(conn)
+					conn.Write([]byte(`
+					SET <KeyName> <value>
+					GET <KeyName>
+					DEL <KeyName>
+					\n`))
 
 					conn.Write([]byte("\nto exit: run <exit\n"))
 				case "EXIT":
