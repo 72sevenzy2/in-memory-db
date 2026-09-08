@@ -114,7 +114,7 @@ func main() {
 <h3 align="center">
   <code> go run . </code>
 </h3>
-<h2 align="center">and follow up by declarin`g a variable:</h2>
+<h2 align="center">and follow up by declaring a variable:</h2>
 <h3 align="center">
   <code> SET [KeyName] [Value] </code>
 </h3>
@@ -131,7 +131,7 @@ func main() {
   <code> DEL [KeyName] </code>
 </h3>
 
-<h2 align="center">finally, to exit the program, run:</h2>
+<h2 align="center">finally, to exit:</h2>
 <h3 align="center">
   <code> EXIT </code>
 </h3>
