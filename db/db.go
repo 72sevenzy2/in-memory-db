@@ -22,9 +22,11 @@ func NewDB() *DB { // initialise a new map to hold data
 	}
 }
 
+var InvalidInputErr = errors.New("invalid input.")
+
 func (v *DB) SetInt(key string, value uint32) error {
 	if value == 0 {
-		return errors.New("please include a value greater than 0.")
+		return InvalidInputErr
 	}
 
 	buf := make([]byte, 4) // uint32's has a fixed byte size of 4
@@ -36,7 +38,7 @@ func (v *DB) SetInt(key string, value uint32) error {
 		Data:  buf,
 	}
 	return nil
-}	
+}
 
 func (v *DB) GetInt(key string) (uint32, bool) {
 	data, ok := v.data[key]         // data will be of type of the Entity struct
@@ -81,7 +83,7 @@ func (v *DB) SetString(key string, value string) error {
 		}
 		return nil
 	}
-	return errors.New("please include a value aswell.")
+	return InvalidInputErr
 }
 
 // get method for string
