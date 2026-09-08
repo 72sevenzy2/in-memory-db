@@ -3,12 +3,13 @@ package db
 import (
 	"encoding/binary"
 	"errors"
+	"unsafe"
 )
 
 // metadata for value types
 type Entity struct {
 	Data  []byte
-	Value string // will be kind of like: "string", "int", will manually assign these types after manually checking value type in main.go
+	Value string
 }
 
 // core logic
@@ -23,6 +24,7 @@ func NewDB() *DB { // initialise a new map to hold data
 }
 
 var InvalidInputErr = errors.New("invalid input.")
+var KeyAlreadyExistsErr = errors.New("key already exists.")
 
 func (v *DB) SetInt(key string, value uint32) error {
 	if value == 0 {
@@ -33,9 +35,13 @@ func (v *DB) SetInt(key string, value uint32) error {
 
 	binary.LittleEndian.PutUint32(buf, value)
 
-	v.data[key] = Entity{
-		Value: "int", // will then be compared in GetAllInt() func to make sure its int
-		Data:  buf,
+	if _, ok := v.data[key]; ok {
+		v.data[key] = Entity{
+			Value: "int", // will then be compared in GetAllInt() func to make sure its int
+			Data:  buf,
+		}
+	} else {
+		return KeyAlreadyExistsErr
 	}
 	return nil
 }
@@ -59,6 +65,7 @@ func (v *DB) GetInt(key string) (uint32, bool) {
 func (v *DB) GetAllInt() (map[string]uint32, bool) {
 	result := make(map[string]uint32)
 
+	// futur: keep track of all data types stored in db and print as so without looping through each.
 	for k, v := range v.data {
 		if v.Value == "int" { // make sure type is int before serialization
 			result[k] = binary.LittleEndian.Uint32(v.Data)
@@ -75,15 +82,19 @@ func (v *DB) GetAllInt() (map[string]uint32, bool) {
 // string serialization and handlers
 
 func (v *DB) SetString(key string, value string) error {
-	if value != "" {
-		byteStr := []byte(value) // serialize string to type []byte, because db holds values of type []bte
+	if value == "" {
+		return InvalidInputErr
+	}
+
+	if _, ok := v.data[key]; !ok {
 		v.data[key] = Entity{
 			Value: "string",
-			Data:  byteStr,
+			Data:  unsafe.Slice(unsafe.StringData(value), len(value)), // refers to the underlying []byte representation of value, without []byte conversions with copying
 		}
-		return nil
+	} else {
+		return KeyAlreadyExistsErr
 	}
-	return InvalidInputErr
+	return nil
 }
 
 // get method for string
@@ -91,12 +102,12 @@ func (v *DB) SetString(key string, value string) error {
 func (v *DB) GetString(key string) (string, bool) {
 	val, ok := v.data[key] // val is if type Entity struct
 
-	var resp string            // response string
-	if val.Value == "string" { // check if string
-		resp = string(val.Data)
+	if !ok || val.Value != "string" { // check if string
+		return "", false
 	}
 
-	return resp, ok
+	// returns string representation of val.Data without a string conversion.
+	return unsafe.String(unsafe.SliceData(val.Data), len(val.Data)), true
 }
 
 // display all string value data from db
@@ -106,7 +117,7 @@ func (v *DB) GetAllString() (map[string]string, bool) {
 
 	for k, val := range v.data {
 		if val.Value == "string" {
-			results[k] = string(val.Data)
+			results[k] = unsafe.String(unsafe.SliceData(val.Data), len(val.Data))
 		}
 	}
 
