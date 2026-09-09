@@ -17,8 +17,7 @@ import (
 func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	if len(parts) < 4 || len(parts) > 4 {
 		conn.Write(db.StringToByte("invalid SET format:\n" +
-			"SET <KeyName> <value> <TTL Expiration (in minutes, eg: 5)>\n" +
-			".\n",
+			"SET <KeyName> <value> <TTL Expiration (in minutes, eg: 5)>\n",
 		))
 		return false
 	}

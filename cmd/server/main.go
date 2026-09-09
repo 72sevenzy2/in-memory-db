@@ -42,6 +42,8 @@ func main() {
 				parts := strings.Fields(input)
 
 				if len(parts) == 0 { // avoid panic
+					// write exit delimeter to avoid hung connections upon empty inputs entered.
+					conn.Write(db.StringToByte(".\n"))
 					continue
 				}
 
@@ -82,7 +84,7 @@ func main() {
 						",\n",
 					))
 				default:
-					conn.Write(db.StringToByte("invalid command.\n" +
+					conn.Write(db.StringToByte("invalid command \n" +
 						".\n",
 					))
 				}
