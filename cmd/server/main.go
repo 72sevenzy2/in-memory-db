@@ -15,6 +15,8 @@ func main() {
 		panic(err)
 	}
 
+	b := db.NewDB() // connections share same db instance.
+
 	for {
 		conn, err := ln.Accept()
 
@@ -22,7 +24,6 @@ func main() {
 			fmt.Println(err.Error()) // err acceping connections
 			continue
 		}
-		b := db.NewDB() // db
 
 		// seperate gorounine for each connection
 		go func(c net.Conn) {

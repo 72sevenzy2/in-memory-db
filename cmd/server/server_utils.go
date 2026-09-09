@@ -29,7 +29,6 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	f, err := strconv.ParseUint(parts[2], 10, 32) // returns uint64, err.
 
 	if err == nil { // its a int.
-
 		// prevent f from overflowing if number entered is too big
 		if f > math.MaxUint32 {
 			conn.Write(db.StringToByte("please include a number value within range of unsigned int32.\n"))
@@ -38,30 +37,24 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 		err2 := b.SetInt(parts[1], uint32(f), time.Minute*time.Duration(n))
 		if err2 != nil {
-			fmt.Println(err2.Error()) // print on server side
-			conn.Write(db.StringToByte("error:\n" +
-				err2.Error() + "\n",
-			))
+			conn.Write(db.StringToByte(err2.Error() + "\n"))
 			return false
 		}
-		conn.Write(db.StringToByte("successful.\n" +
-			".\n"),
-		)
+		conn.Write(db.StringToByte("successful\n" +
+			".\n",
+		))
 		return true
 	}
 
 	// its a string if unable to parse to uint.
 	err2 := b.SetString(parts[1], parts[2], time.Minute*time.Duration(n))
-	conn.Write(db.StringToByte("successful.\n" +
-		".\n"),
-	)
 	if err2 != nil {
-		fmt.Println(err2.Error())
-		conn.Write(db.StringToByte("error:\n" +
-			err2.Error() + "\n",
-		))
+		conn.Write(db.StringToByte(err2.Error() + "\n"))
 		return false
 	}
+	conn.Write(db.StringToByte("successful\n" +
+		".\n",
+	))
 	return true
 }
 
