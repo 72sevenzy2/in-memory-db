@@ -89,17 +89,19 @@ func Get(parts []string, b *db.DB, conn net.Conn) bool {
 		return false
 	}
 	// fmt.Println(val)
-	conn.Write(db.StringToByte(strconv.FormatUint(uint64(val), 10) + "\n")) // convert uint32 to readable format
+	conn.Write(db.StringToByte(strconv.FormatUint(uint64(val), 10) + "\n" +
+		".\n",
+	)) // convert uint32 to readable format
 	return true
 }
 
-func Fetch(b *db.DB, conn net.Conn) {
+func Fetch(b *db.DB, conn net.Conn) bool {
 	vals, ok := b.GetAllInt()      // returns map[string]uint32, bool
 	vals2, ok2 := b.GetAllString() // returns map[string]string, bool
 
 	if !ok && !ok2 {
 		conn.Write(db.StringToByte("no available key-values\n"))
-		return
+		return false
 	}
 
 	for k, v := range vals {
@@ -108,6 +110,8 @@ func Fetch(b *db.DB, conn net.Conn) {
 	for k, v := range vals2 {
 		fmt.Fprintln(conn, k, v)
 	}
+
+	return true
 }
 
 func Del(parts []string, conn net.Conn, b *db.DB) bool {

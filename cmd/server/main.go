@@ -60,10 +60,13 @@ func main() {
 				case "GET":
 					ok := Get(parts, b, conn)
 					if !ok {
-						continue
+						conn.Write(db.StringToByte(".\n"))
 					}
 				case "FETCH":
-					Fetch(b, conn)
+					ok := Fetch(b, conn)
+					if !ok {
+						conn.Write(db.StringToByte(".\n"))
+					}
 					conn.Write(db.StringToByte(".\n"))
 				case "DEL":
 					ok := Del(parts, conn, b)
