@@ -63,10 +63,7 @@ func main() {
 						conn.Write(db.StringToByte(".\n"))
 					}
 				case "FETCH":
-					ok := Fetch(b, conn)
-					if !ok {
-						conn.Write(db.StringToByte(".\n"))
-					}
+					Fetch(b, conn)
 					conn.Write(db.StringToByte(".\n"))
 				case "DEL":
 					ok := Del(parts, conn, b)

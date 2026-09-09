@@ -22,9 +22,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 	n, err := strconv.Atoi(parts[3]) // parse ttl expiration
 	if err != nil {
-		conn.Write(db.StringToByte("please include a valid TTL, (eg: 10, will be in minutes)\n" +
-			".\n",
-		))
+		conn.Write(db.StringToByte("please include a valid TTL, (eg: 10, will be in minutes)\n"))
 		return false
 	}
 
@@ -34,9 +32,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 		// prevent f from overflowing if number entered is too big
 		if f > math.MaxUint32 {
-			conn.Write(db.StringToByte("please include a number value within range of unsigned int32.\n" +
-				".\n",
-			))
+			conn.Write(db.StringToByte("please include a number value within range of unsigned int32.\n"))
 			return false
 		}
 
@@ -44,8 +40,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 		if err2 != nil {
 			fmt.Println(err2.Error()) // print on server side
 			conn.Write(db.StringToByte("error:\n" +
-				err2.Error() + "\n" +
-				".\n",
+				err2.Error() + "\n",
 			))
 			return false
 		}
@@ -63,8 +58,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	if err2 != nil {
 		fmt.Println(err2.Error())
 		conn.Write(db.StringToByte("error:\n" +
-			err2.Error() + "\n" +
-			".\n",
+			err2.Error() + "\n",
 		))
 		return false
 	}
@@ -73,8 +67,9 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 
 func Get(parts []string, b *db.DB, conn net.Conn) bool {
 	if len(parts) < 2 || len(parts) > 2 {
-		conn.Write(db.StringToByte("invalid GET format:\n"))
-		conn.Write(db.StringToByte("GET <KeyName>\n"))
+		conn.Write(db.StringToByte("invalid GET format:\n" +
+			"GET <KeyName>\n",
+		))
 		return false
 	}
 
@@ -85,33 +80,32 @@ func Get(parts []string, b *db.DB, conn net.Conn) bool {
 			conn.Write(db.StringToByte("data does not exist\n"))
 			return false
 		}
-		conn.Write(db.StringToByte(val2 + "\n"))
-		return false
+		conn.Write(db.StringToByte(val2 + "\n" +
+			".\n",
+		))
+		return true
 	}
-	// fmt.Println(val)
 	conn.Write(db.StringToByte(strconv.FormatUint(uint64(val), 10) + "\n" +
 		".\n",
 	)) // convert uint32 to readable format
 	return true
 }
 
-func Fetch(b *db.DB, conn net.Conn) bool {
+func Fetch(b *db.DB, conn net.Conn) {
 	vals, ok := b.GetAllInt()      // returns map[string]uint32, bool
 	vals2, ok2 := b.GetAllString() // returns map[string]string, bool
 
 	if !ok && !ok2 {
-		conn.Write(db.StringToByte("no available key-values\n"))
-		return false
+		conn.Write(db.StringToByte("no available key-values" + ".\n"))
+		return
 	}
 
 	for k, v := range vals {
-		fmt.Fprintln(conn, k, int(v))
+		fmt.Fprint(conn, k+" ", int(v), ".\n")
 	}
 	for k, v := range vals2 {
-		fmt.Fprintln(conn, k, v)
+		fmt.Fprint(conn, k+" ", v, ".\n")
 	}
-
-	return true
 }
 
 func Del(parts []string, conn net.Conn, b *db.DB) bool {
