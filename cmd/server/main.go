@@ -68,7 +68,7 @@ func main() {
 				case "DEL":
 					ok := Del(parts, conn, b)
 					if !ok {
-						continue
+						conn.Write(db.StringToByte(".\n"))
 					}
 				case "HELP":
 					conn.Write(db.StringToByte("General usage: \n" +

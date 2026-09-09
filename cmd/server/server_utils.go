@@ -12,8 +12,6 @@ import (
 
 // utility functions for server/main.go
 
-// todo: add ttl existence validation to cli for setting ttls.
-
 func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	if len(parts) < 4 || len(parts) > 4 {
 		conn.Write(db.StringToByte("invalid SET format:\n" +
@@ -115,17 +113,21 @@ func Fetch(b *db.DB, conn net.Conn) {
 func Del(parts []string, conn net.Conn, b *db.DB) bool {
 	if len(parts) < 2 || len(parts) > 2 {
 		conn.Write(db.StringToByte("usage: DEL <KeyName>\n"))
+		return false
 	}
 	if _, ok := b.GetInt(parts[1]); ok {
 		b.Del(parts[1])
-		conn.Write(db.StringToByte("successfully deleted key\n"))
+		conn.Write(db.StringToByte("successfully deleted key\n" +
+			".\n",
+		))
+		return true
 	}
 	if _, ok := b.GetString(parts[1]); ok {
 		b.Del(parts[1])
-		conn.Write(db.StringToByte("successfuly deleted key\n"))
-		return false
+		conn.Write(db.StringToByte("successfuly deleted key\n" +
+			".\n",
+		))
+		return true
 	}
-	fmt.Fprintln(conn, "key does not exit.", parts[1])
 	return false
-
 }
