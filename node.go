@@ -1,34 +1,17 @@
-package cmd
+package db
 
 import (
 	"fmt"
 	"net"
-	"sync"
-
-	"github.com/72sevenzy2/in-memory-database"
 )
-
-// a node represents an database instance.
-type Node struct {
-	lock sync.RWMutex
-
-	ID   string
-	Addr string
-	role Role
-
-	// Replicas represent a string array of existing nodes addresses.
-	Replicas []string
-
-	DB *db.DB
-}
 
 func NewNode(id, addr string, role Role, replicas []string) *Node {
 	return &Node{
 		ID:       id,
 		Addr:     addr,
-		role:     role,
+		NodeRole: role,
 		Replicas: replicas,
-		DB:       db.NewDB(),
+		DB:       NewDB(),
 	}
 }
 
@@ -48,6 +31,8 @@ func (n *Node) Start() error {
 			return err
 		}
 
-		go n.HandleConnection(conn)
+		go HandleConnection(conn, n)
 	}
 }
+
+
