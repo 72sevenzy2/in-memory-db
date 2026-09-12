@@ -1,15 +1,14 @@
 package cmd
 
 import (
+	"fmt"
+	"net"
 	"sync"
 
 	"github.com/72sevenzy2/in-memory-database/db"
 )
 
 // a node represents an database instance.
-
-type Role uint8 // small integer which dictates a nodes role.
-
 type Node struct {
 	lock sync.RWMutex
 
@@ -23,17 +22,31 @@ type Node struct {
 	DB *db.DB
 }
 
-// Represents a nodes role, either an follower or leader.
-const (
-	Leader Role = iota
-	Follower
-)
-
 func NewNode(id, addr string, role Role) *Node {
 	return &Node{
 		ID:   id,
 		Addr: addr,
 		role: role,
 		DB:   db.NewDB(),
+	}
+}
+
+func (n *Node) Start(cmd Command) error {
+	l, err := net.Listen("tcp", n.Addr)
+	if err != nil {
+		return err
+	}
+
+	defer l.Close()
+
+	fmt.Println("node listening on addr:", n.Addr)
+
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			return err
+		}
+
+		go n.HandleConnection(conn)
 	}
 }
