@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
+	"github.com/72sevenzy2/in-memory-database/cmd"
+	"github.com/72sevenzy2/in-memory-database"
 	"math"
 	"net"
 	"strconv"
 	"time"
-
-	"github.com/72sevenzy2/in-memory-database/db"
 )
 
 // utility functions for server/main.go
 
-func Set(parts []string, conn net.Conn, b *db.DB) bool {
+func Set(parts []string, conn net.Conn, node *cmd.Node) bool {
 	if len(parts) < 4 || len(parts) > 4 {
 		conn.Write(db.StringToByte("invalid SET format:\n" +
 			"SET <KeyName> <value> <TTL Expiration (in minutes, eg: 5)>\n",
@@ -35,7 +35,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 			return false
 		}
 
-		err2 := b.SetInt(parts[1], uint32(f), time.Minute*time.Duration(n))
+		err2 := node.DB.SetInt(parts[1], uint32(f), time.Minute*time.Duration(n))
 		if err2 != nil {
 			conn.Write(db.StringToByte(err2.Error() + "\n"))
 			return false
@@ -47,7 +47,7 @@ func Set(parts []string, conn net.Conn, b *db.DB) bool {
 	}
 
 	// its a string if unable to parse to uint.
-	err2 := b.SetString(parts[1], parts[2], time.Minute*time.Duration(n))
+	err2 := node.SetStr(parts[1], parts[2], time.Minute*time.Duration(n))
 	if err2 != nil {
 		conn.Write(db.StringToByte(err2.Error() + "\n"))
 		return false
