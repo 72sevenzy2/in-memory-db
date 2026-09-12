@@ -23,12 +23,14 @@ type Node struct {
 }
 
 func NewNode(id, addr string, role Role) *Node {
-	return &Node{
-		ID:   id,
-		Addr: addr,
-		role: role,
-		DB:   db.NewDB(),
-	}
+	n := &Node{}
+
+	n.Replicas = append(n.Replicas, addr)
+	n.ID = id
+	n.role = role
+	n.DB = db.NewDB()
+
+	return n
 }
 
 func (n *Node) Start(cmd Command) error {
