@@ -18,14 +18,14 @@ func (n *Node) AssignLeader() {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
-	n.NodeRole = 0
+	n.NodeRole = Leader
 }
 
 func (n *Node) AssignFollower() {
 	n.lock.Lock()
 	defer n.lock.Unlock()
 
-	n.NodeRole = 1
+	n.NodeRole = Follower
 }
 
 var InvalidRoleErr = errors.New("node is not a leader.")
