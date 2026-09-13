@@ -29,7 +29,8 @@ func (n *Node) AssignFollower() {
 }
 
 var InvalidRoleErr = errors.New("node is not a leader.")
-
+var InvalidSetStrTypeErr = errors.New("SetStr requires string value")
+var InvalidSetIntTypeErr = errors.New("SetInt requires int value")
 // Commands for which each node will replicate.
 func (n *Node) SetStr(key, value string, TTL time.Duration) error {
 	if n.NodeRole != Leader {
@@ -46,7 +47,7 @@ func (n *Node) SetStr(key, value string, TTL time.Duration) error {
 	// type checking cmd.value
 	value, ok := cmd.Value.(string)
 	if !ok {
-		return fmt.Errorf("SetStr requires string value")
+		return InvalidSetStrTypeErr
 	}
 
 	// applying command locally before other nodes
@@ -78,7 +79,7 @@ func (n *Node) SetInt(key string, value uint32, TTL time.Duration) error {
 
 	val, ok := cmd.Value.(uint32)
 	if !ok {
-		return fmt.Errorf("SetInt requires int value")
+		return InvalidSetIntTypeErr
 	}
 
 	// applying command locally before other nodes
